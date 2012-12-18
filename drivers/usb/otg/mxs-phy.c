@@ -24,9 +24,19 @@
 #define DRIVER_NAME "mxs_phy"
 
 #define HW_USBPHY_PWD				0x00
+#define HW_USBPHY_PWD_SET			0x04
+#define HW_USBPHY_PWD_CLR			0x08
 #define HW_USBPHY_CTRL				0x30
 #define HW_USBPHY_CTRL_SET			0x34
 #define HW_USBPHY_CTRL_CLR			0x38
+
+#define BM_USBPHY_PWD_RXPWDRX			BIT(20)
+#define BM_USBPHY_PWD_RXPWDIFF			BIT(19)
+#define BM_USBPHY_PWD_RXPWD1PT1			BIT(18)
+#define BM_USBPHY_PWD_RXPWDENV			BIT(17)
+#define BM_USBPHY_PWD_TXPWDV2I			BIT(12)
+#define BM_USBPHY_PWD_TXPWDIBIAS		BIT(11)
+#define BM_USBPHY_PWD_TXPWDFS			BIT(10)
 
 #define BM_USBPHY_CTRL_SFTRST			BIT(31)
 #define BM_USBPHY_CTRL_CLKGATE			BIT(30)
@@ -43,14 +53,33 @@ struct mxs_phy {
 
 static void mxs_phy_hw_init(struct mxs_phy *mxs_phy)
 {
+        int reset_sts;
 	void __iomem *base = mxs_phy->phy.io_priv;
 
-	stmp_reset_block(base + HW_USBPHY_CTRL);
+	/* Use global device reset function.  Side effect of this 
+	   is to soft reset USBPHY_PWD, USBPHY_TX, USBPHY_RX, 
+	   and USBPHY_CTRL registers. */
+	reset_sts = stmp_reset_block(base + HW_USBPHY_CTRL);
+	if (reset_sts) {
+		dev_err(mxs_phy->phy.dev, "USB PHY reset failed!\n");
+	}
 
-	/* Power up the PHY */
-	writel_relaxed(0, base + HW_USBPHY_PWD);
+	/* Enable the PHY clock after reset. */
+	writel_relaxed(BM_USBPHY_CTRL_SFTRST |
+			BM_USBPHY_CTRL_CLKGATE,
+			base + HW_USBPHY_CTRL_CLR);
 
-	/* enable FS/LS device */
+	/* Power up the PHY after reset. */
+	writel_relaxed(BM_USBPHY_PWD_RXPWDRX |
+			BM_USBPHY_PWD_RXPWDIFF |
+			BM_USBPHY_PWD_RXPWD1PT1	|
+			BM_USBPHY_PWD_RXPWDENV |
+			BM_USBPHY_PWD_TXPWDV2I |
+			BM_USBPHY_PWD_TXPWDIBIAS |
+			BM_USBPHY_PWD_TXPWDFS, 
+			base + HW_USBPHY_PWD_CLR);
+
+	/* Enable FS/LS device.  Not supported on i.MX23. */
 	writel_relaxed(BM_USBPHY_CTRL_ENUTMILEVEL2 |
 			BM_USBPHY_CTRL_ENUTMILEVEL3,
 			base + HW_USBPHY_CTRL_SET);
@@ -70,6 +99,17 @@ static void mxs_phy_shutdown(struct usb_phy *phy)
 {
 	struct mxs_phy *mxs_phy = to_mxs_phy(phy);
 
+        /* Power down USB receivers and transmitters. */
+	writel_relaxed(BM_USBPHY_PWD_RXPWDRX |
+			BM_USBPHY_PWD_RXPWDIFF |
+			BM_USBPHY_PWD_RXPWD1PT1	|
+			BM_USBPHY_PWD_RXPWDENV |
+			BM_USBPHY_PWD_TXPWDV2I |
+			BM_USBPHY_PWD_TXPWDIBIAS |
+			BM_USBPHY_PWD_TXPWDFS, 
+			phy->io_priv + HW_USBPHY_PWD_SET);
+
+	/* Disable clock. */
 	writel_relaxed(BM_USBPHY_CTRL_CLKGATE,
 			phy->io_priv + HW_USBPHY_CTRL_SET);
 
@@ -81,8 +121,6 @@ static int mxs_phy_on_connect(struct usb_phy *phy, int port)
 	dev_dbg(phy->dev, "Connect on port %d\n", port);
 
 	mxs_phy_hw_init(to_mxs_phy(phy));
-	writel_relaxed(BM_USBPHY_CTRL_ENHOSTDISCONDETECT,
-			phy->io_priv + HW_USBPHY_CTRL_SET);
 
 	return 0;
 }
