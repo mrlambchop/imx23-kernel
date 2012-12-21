@@ -33,7 +33,6 @@ MDEV="/bin/mdev"
 $MKDIR -p /usr
 $MKDIR -p /usr/bin
 $MKDIR -p /usr/sbin
-$MKDIR -p /sbin
 
 # Kernel command-line (convenience variable)
 KCMD="/proc/cmdline"

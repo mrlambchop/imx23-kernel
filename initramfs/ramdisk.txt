@@ -2,9 +2,24 @@ dir /dev 755 0 0
 nod /dev/console 644 0 0 c 5 1
 nod /dev/loop0 644 0 0 b 7 0
 dir /bin 755 1000 1000
+dir /sbin 755 1000 1000
 slink /bin/sh busybox 777 0 0
 file /bin/busybox initramfs/bin/busybox 755 0 0
 dir /proc 755 0 0
 dir /sys 755 0 0
 dir /mnt 755 0 0
 file /init initramfs/init.sh 755 0 0
+dir /etc 755 0 0
+dir /lib 755 0 0
+dir /lib/firmware 755 0 0
+dir /lib/firmware/rtlwifi 755 0 0
+file /lib/firmware/rtlwifi/rtl8192cufw.bin initramfs/lib/firmware/rtlwifi/rtl8192cufw.bin 755 0 0
+file /etc/rtlwifi_firmware.sh initramfs/etc/rtlwifi_firmware.sh 755 0 0
+file /sbin/ifrename initramfs/sbin/ifrename 755 0 0
+file /sbin/iwconfig initramfs/sbin/iwconfig 755 0 0
+file /sbin/iwevent initramfs/sbin/iwevent 755 0 0
+file /sbin/iwgetid initramfs/sbin/iwgetid 755 0 0
+file /sbin/iwlist initramfs/sbin/iwlist 755 0 0
+file /sbin/iwpriv initramfs/sbin/iwpriv 755 0 0
+file /sbin/iwspy initramfs/sbin/iwspy 755 0 0
+file /etc/wifi.sh initramfs/etc/wifi.sh 755 0 0
