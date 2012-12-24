@@ -10,9 +10,13 @@ dir /sys 755 0 0
 dir /mnt 755 0 0
 file /init initramfs/init.sh 755 0 0
 dir /etc 755 0 0
-dir /lib 755 0 0
+dir /etc/udhcpc 755 0 0
+dir /var 755 1000 1000 
+dir /var/run 755 1000 1000 
+dir /lib 755 1000 1000
 dir /lib/firmware 755 0 0
 dir /lib/firmware/rtlwifi 755 0 0
+dir /lib/modules 755 0 0
 file /lib/firmware/rtlwifi/rtl8192cufw.bin initramfs/lib/firmware/rtlwifi/rtl8192cufw.bin 755 0 0
 file /etc/rtlwifi_firmware.sh initramfs/etc/rtlwifi_firmware.sh 755 0 0
 file /sbin/ifrename initramfs/sbin/ifrename 755 0 0
@@ -23,3 +27,14 @@ file /sbin/iwlist initramfs/sbin/iwlist 755 0 0
 file /sbin/iwpriv initramfs/sbin/iwpriv 755 0 0
 file /sbin/iwspy initramfs/sbin/iwspy 755 0 0
 file /etc/wifi.sh initramfs/etc/wifi.sh 755 0 0
+file /sbin/wpa_passphrase initramfs/sbin/wpa_passphrase 755 0 0
+file /sbin/wpa_supplicant initramfs/sbin/wpa_supplicant 755 0 0
+file /sbin/wpa_cli initramfs/sbin/wpa_cli 755 0 0
+file /etc/wpa_supplicant.conf initramfs/etc/wpa_supplicant.conf 644 0 0
+file /bin/nano initramfs/bin/nano 755 0 0
+file /etc/terminfo.tar initramfs/etc/terminfo.tar 644 0 0
+file /etc/udhcpc/default.script initramfs/etc/udhcpc/default.script 755 0 0
+file /lib/modules/rtl8192cu.ko drivers/net/wireless/rtlwifi/rtl8192cu/rtl8192cu.ko 755 0 0
+file /lib/modules/rtlwifi.ko drivers/net/wireless/rtlwifi/rtlwifi.ko 755 0 0
+file /lib/modules/rtl8192c-common.ko drivers/net/wireless/rtlwifi/rtl8192c/rtl8192c-common.ko 755 0 0
+
