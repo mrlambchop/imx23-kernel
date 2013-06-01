@@ -7,7 +7,7 @@
 #
 ################################################################################
 
-PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin"
 
 # Path to directory to mount $ROOTDEV under in initrd
 NEWROOT="/newroot"
@@ -20,14 +20,14 @@ CAT="/bin/busybox cat"
 CHMOD="/bin/busybox chmod"
 MOUNT="/bin/busybox mount"
 UMOUNT="/bin/busybox umount"
-SHELL="/bin/busybox sh"
+SHELL="/bin/busybox setsid cttyhack sh"
 MKDIR="/bin/busybox mkdir"
 GREP="/bin/busybox grep"
 AWK="/bin/busybox awk"
 SWITCH="/bin/busybox switch_root"
 
 # mdev (busybox symlinks should be usable when using this)
-MDEV="/bin/mdev"
+MDEV="/sbin/mdev"
 
 #make the basic directories
 $MKDIR -p /usr
@@ -37,6 +37,20 @@ $MKDIR -p /usr/sbin
 # Kernel command-line (convenience variable)
 KCMD="/proc/cmdline"
 
+
+#Wifi function
+wifi () {
+        echo ''
+        echo 'Launching linksys WiFi'
+        sleep 2
+        echo 'Bringing up interface and assocate to linksys'
+        ifconfig wlan0 up
+        sleep 1
+        iwconfig wlan0 essid linksys
+        sleep 5
+        udhcpc -p /var/run/udhcpc.pid -i wlan0 -b -s /etc/udhcpc/default.script
+}
+
 # Function for dropping to a shell
 shell () {
         echo ''
@@ -44,6 +58,8 @@ shell () {
         echo '  Type rootdev root_device to set device to boot.'
         echo '     ex: rootdev /dev/sda1'
         echo '  Exit shell to continue booting.'
+        echo '  STARTING WIFI'
+        wifi
         $SHELL
 }
 
@@ -63,6 +79,13 @@ echo "Entering initramfs"
 # /proc still needs to be mounted before the symlinks will work
 echo "Creating busybox symlinks"
 $BBINSTALL
+
+#dropbear hack
+ln -s /bin/dropbearmulti /bin/dropbear
+ln -s /bin/dropbearmulti /bin/dropbearkey
+ln -s /bin/dropbearmulti /bin/scp
+ln -s /bin/dropbearmulti /bin/dbclient
+ln -s /bin/dropbearmulti /bin/ssh
 
 # Ensure that basic directories exist
 for dir in /proc /sys /dev

@@ -1,19 +1,38 @@
 #/bin/sh
 
-if test -n $1
+if test -z $1
 then
-   $NAME = $1
+   echo "Missing firmware name! Options are rtl or linksys"
+   exit 0
 else
-  echo "Missing name for firmware class! Assuming 1-1.2"
+   if [ $1 == "rtl" ]
+   then
+      echo "Selecting RTL"
+      export FIRMWARE="rtlwifi/rtl8192cufw/bin"
+   elif [ $1 == "linksys" ]
+   then
+      echo "Selecting linksys"
+      export FIRMWARE="isl3886usb"
+   else
+      echo Unknown value $1 - Options are rtl or linksys
+      exit 0
+   fi
 fi
 
-echo "Loading to /sys/class/firmware/$1/"
-echo 1 > /sys/class/firmware/$1/loading
-cat /lib/firmware/rtlwifi/rtl8192cufw.bin > /sys/class/firmware/$1/data
-echo 0 > /sys/class/firmware/$1/loading
+if [ $# == 2 ]
+then
+   echo Setting firmware class as $2
+   export USB_NAME=$2
+else
+  echo "Missing name for firmware class! Assuming 1-1.2"
+  export USB_NAME="1-1.2"
+fi
+
+#export | less
+
+echo Loading to /sys/class/firmware/$USB_NAME/
+echo Firmware from /lib/firmware/$FIRMWARE
+echo 1 > /sys/class/firmware/$USB_NAME/loading
+cat /lib/firmware/$FIRMWARE > /sys/class/firmware/$USB_NAME/data
+echo 0 > /sys/class/firmware/$USB_NAME/loading
 echo "Done"
-
-sleep 1
-
-echo "wlan up!"
-ifconfig wlan0 up
